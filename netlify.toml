@@ -5,5 +5,5 @@
 
 [dev]
   command = "npm start"
-  targetPort = 3002
+  targetPort = 3005
   port = 8888
