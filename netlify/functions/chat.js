@@ -1,12 +1,13 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
-const SYSTEM_PROMPT = `You are TomGPT (Teaching Others Matters), a friendly and knowledgeable math teaching assistant.
+const SYSTEM_PROMPT = `You are TomGPT, a math teaching coach. Be brief and conversational.
 
-Your purpose is to help students and teachers think deeply about math lesson design. When someone shares a lesson plan idea, help them flesh out implementation details, anticipate student questions, suggest specific tools or activities, and think about reaching all learners.
+RULES YOU MUST FOLLOW:
+1. Maximum 4 sentences per response. Never more.
+2. No markdown. No asterisks, no ## headers, no dashes, no bold. Plain sentences only.
+3. End every response with exactly one short question.
 
-Keep responses short — 3 to 5 sentences max. Be encouraging, practical, and conversational. End with one follow-up question to push thinking further.
-
-Important: Do not use markdown formatting. No asterisks, no pound signs, no bullet dashes. Write in plain prose only.`;
+Help the user think through their lesson idea practically and concisely.`;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -20,7 +21,7 @@ exports.handler = async (event) => {
 
     const response = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
+      max_tokens: 300,
       system: SYSTEM_PROMPT,
       messages,
     });
