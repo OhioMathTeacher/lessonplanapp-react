@@ -38,8 +38,8 @@ function App() {
     }
   };
 
-  const uploadCardSize = 180;
-  const revisionCardHeight = 480;
+  const uploadCardSize = 200;
+  const cardRowHeight = 'calc((100vh - 120px) / 3)';
 
   // Choose a background image from images folder
   const backgroundImage = require('./images/strategic-planning-a-group-works-at-a-table.webp');
@@ -126,8 +126,8 @@ function App() {
                       style={{
                         border: '1px solid #ccc',
                         borderRadius: 8,
-                        minHeight: uploadCardSize,
-                        height: uploadCardSize,
+                        minHeight: cardRowHeight,
+                        height: cardRowHeight,
                         width: '100%',
                         display: 'flex',
                         flexDirection: 'column',
@@ -167,8 +167,8 @@ function App() {
                       style={{
                         background: '#e3eafc',
                         borderRadius: 8,
-                        minHeight: revisionCardHeight,
-                        height: revisionCardHeight,
+                        minHeight: cardRowHeight,
+                        height: cardRowHeight,
                         width: '100%',
                         display: 'flex',
                         alignItems: 'center',
