@@ -6,6 +6,10 @@ exports.handler = async (event) => {
   }
 
   try {
+    const keyPresent = !!process.env.ANTHROPIC_API_KEY;
+    const keyPrefix = process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.substring(0, 10) : 'MISSING';
+    console.log('API key present:', keyPresent, 'prefix:', keyPrefix);
+
     const { fileData, mimeType } = JSON.parse(event.body);
 
     const isPdf = mimeType === 'application/pdf';
