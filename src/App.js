@@ -81,10 +81,8 @@ function App() {
   const handleChatSubmit = (e) => {
     e.preventDefault();
     if (!chatInput.trim() || chatLoading) return;
-    const newMessages = [...chatMessages.filter(m => !m.isGreeting || m.role === 'user'), { role: 'user', content: chatInput.trim() }];
-    // Build actual API messages (exclude greeting-only assistant messages that have no prior user context)
     const apiMessages = chatMessages.reduce((acc, msg) => {
-      if (msg.isGreeting) return acc; // skip auto-greetings from API call history
+      if (msg.isGreeting) return acc;
       acc.push({ role: msg.role, content: msg.content });
       return acc;
     }, []);
