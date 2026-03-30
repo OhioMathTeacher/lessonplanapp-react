@@ -38,9 +38,8 @@ function App() {
     }
   };
 
-  // Card height matches revision idea cards
-  const cardHeight = 270; // 1.5x taller than 180
-  const cardWidth = '85%';
+  const uploadCardSize = 220;
+  const revisionCardHeight = 520;
 
   // Choose a background image from images folder
   const backgroundImage = require('./images/strategic-planning-a-group-works-at-a-table.webp');
@@ -66,9 +65,9 @@ function App() {
       />
       <div style={{ position: 'relative', zIndex: 1 }}>
         {/* Removed the main title as requested */}
-        <div style={{ width: '100%', maxWidth: 1800, margin: '0 auto' }}>
+        <div style={{ width: '100%', margin: '0 auto' }}>
           {/* 4-column grid: Uploads + 3 revision areas */}
-          <div style={{ display: 'grid', gridTemplateColumns: '260px 60px repeat(3, 1fr)', gap: 16, alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `auto ${uploadCardSize}px repeat(3, 1fr)`, gap: 16, alignItems: 'start' }}>
             {/* Top row: empty cell + column headers */}
             <div></div>
             <div></div>
@@ -84,7 +83,6 @@ function App() {
                 // Upload row: empty cell, Browse button (left), card (right)
                 cards.push(
                   <React.Fragment key={`upload-row-${lessonIdx}`}>
-                    <div></div>
                     <label style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -128,10 +126,9 @@ function App() {
                       style={{
                         border: '1px solid #ccc',
                         borderRadius: 8,
-                        minWidth: 180,
-                        minHeight: cardHeight,
-                        height: cardHeight,
-                        width: cardWidth,
+                        minHeight: uploadCardSize,
+                        height: uploadCardSize,
+                        width: '100%',
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'flex-start',
@@ -168,11 +165,11 @@ function App() {
                     <div
                       key={`cell-${lessonIdx}-${colIdx}`}
                       style={{
-                        background: hasFiles ? '#e3eafc' : '#e3eafc',
+                        background: '#e3eafc',
                         borderRadius: 8,
-                        minHeight: cardHeight,
-                        height: cardHeight,
-                        width: cardWidth,
+                        minHeight: revisionCardHeight,
+                        height: revisionCardHeight,
+                        width: '100%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
