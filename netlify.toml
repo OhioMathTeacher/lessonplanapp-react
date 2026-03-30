@@ -4,6 +4,6 @@
   functions = "netlify/functions"
 
 [dev]
-  command = "PORT=3001 npm start"
+  command = "npm start"
   targetPort = 3001
   port = 8888
