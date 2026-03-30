@@ -18,7 +18,7 @@ function App() {
   // Track uploaded files for each lesson (array of arrays)
   const [uploadedFiles, setUploadedFiles] = useState([[], [], []]);
   const [uploadStatus, setUploadStatus] = useState(['yellow', 'yellow', 'yellow']); // yellow=ready, green=success, red=fail
-  const [modal, setModal] = useState({ open: false, lessonIdx: null, area: null });
+  const [modal, setModal] = useState({ open: false, lessonIdx: null, area: null, summary: null, detail: null });
   // null = no file yet, 'loading' = generating, 'error' = failed, object = ideas ready
   const [ideas, setIdeas] = useState([null, null, null]);
 
@@ -185,15 +185,17 @@ function App() {
                   </React.Fragment>
                 );
                 // 3 revision idea cards
+                const ribbonColors = { Technology: '#1565c0', Differentiation: '#2e7d32', Discourse: '#6a1b9a' };
+                const ribbonBgs = { Technology: '#e3f2fd', Differentiation: '#e8f5e9', Discourse: '#f3e5f5' };
                 for (let colIdx = 0; colIdx < revisionAreas.length; colIdx++) {
                   const area = revisionAreas[colIdx];
                   const hasFiles = uploadedFiles[lessonIdx].length > 0;
                   const lessonIdeas = ideas[lessonIdx];
                   const isLoading = lessonIdeas === 'loading';
                   const isError = lessonIdeas === 'error';
-                  const ideaText = lessonIdeas && typeof lessonIdeas === 'object'
+                  const areaIdeas = lessonIdeas && typeof lessonIdeas === 'object'
                     ? lessonIdeas[area.toLowerCase()] : null;
-                  const hasIdeas = !!ideaText;
+                  const hasIdeas = Array.isArray(areaIdeas) && areaIdeas.length > 0;
 
                   cards.push(
                     <div
@@ -201,30 +203,55 @@ function App() {
                       className="revision-card"
                       data-area={area}
                       style={{
-                        background: '#e3eafc',
+                        background: '#f7f9fc',
                         borderRadius: 8,
                         minHeight: cardRowHeight,
                         height: cardRowHeight,
                         width: '100%',
                         display: 'flex',
                         flexDirection: 'column',
-                        alignItems: hasIdeas ? 'flex-start' : 'center',
-                        justifyContent: hasIdeas ? 'flex-start' : 'center',
-                        fontSize: hasIdeas ? 13 : 15,
-                        color: hasIdeas ? '#222' : (hasFiles ? '#555' : '#aaa'),
+                        alignItems: hasIdeas ? 'stretch' : 'center',
+                        justifyContent: hasIdeas ? 'center' : 'center',
+                        gap: hasIdeas ? 8 : 0,
+                        fontSize: 15,
+                        color: hasFiles ? '#555' : '#aaa',
                         fontStyle: hasFiles ? 'normal' : 'italic',
-                        opacity: hasFiles ? 0.98 : 0.85,
+                        opacity: hasFiles ? 1 : 0.85,
                         transition: 'color 0.2s, opacity 0.3s',
-                        cursor: hasIdeas ? 'pointer' : 'default',
-                        padding: hasIdeas ? '12px 16px' : 0,
+                        padding: hasIdeas ? '12px 10px' : 0,
                         overflowY: hasIdeas ? 'auto' : 'hidden',
                         boxSizing: 'border-box',
                       }}
-                      onClick={() => hasIdeas && setModal({ open: true, lessonIdx, area })}
                     >
-                      {isLoading ? '⏳ Generating ideas...' :
-                       isError ? '⚠️ Could not generate ideas. Try uploading again.' :
-                       hasIdeas ? ideaText :
+                      {isLoading ? <span style={{ textAlign: 'center' }}>⏳ Generating ideas...</span> :
+                       isError ? <span style={{ textAlign: 'center' }}>⚠️ Could not generate ideas. Try uploading again.</span> :
+                       hasIdeas ? areaIdeas.map((idea, i) => (
+                        <button
+                          key={i}
+                          className="ribbon-btn"
+                          onClick={() => setModal({ open: true, lessonIdx, area, summary: idea.summary, detail: idea.detail })}
+                          style={{
+                            display: 'block',
+                            width: '100%',
+                            padding: '10px 14px',
+                            border: `2px solid ${ribbonColors[area]}`,
+                            borderRadius: 8,
+                            background: ribbonBgs[area],
+                            color: ribbonColors[area],
+                            fontWeight: 700,
+                            fontSize: 14,
+                            cursor: 'pointer',
+                            textAlign: 'left',
+                            lineHeight: 1.3,
+                            transition: 'transform 0.1s, box-shadow 0.15s',
+                            boxShadow: '0 1px 4px #0001',
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 3px 12px #0002'; }}
+                          onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 1px 4px #0001'; }}
+                        >
+                          {idea.summary}
+                        </button>
+                       )) :
                        'Upload a lesson plan to get revision ideas.'}
                     </div>
                   );
@@ -254,16 +281,19 @@ function App() {
           zIndex: 1000,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}
-          onClick={() => setModal({ open: false, lessonIdx: null, area: null })}
+          onClick={() => setModal({ open: false, lessonIdx: null, area: null, summary: null, detail: null })}
         >
-          <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 320, minHeight: 120, boxShadow: '0 2px 16px #0002', position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Ideas for Lesson {modal.lessonIdx + 1} — {modal.area}</h2>
-            <div style={{ fontSize: 16, color: '#333', lineHeight: 1.6 }}>
-              {modal.lessonIdx !== null && ideas[modal.lessonIdx] && typeof ideas[modal.lessonIdx] === 'object'
-                ? ideas[modal.lessonIdx][modal.area.toLowerCase()]
-                : 'No ideas available.'}
+          <div style={{ background: '#fff', borderRadius: 16, padding: '32px 36px', maxWidth: 540, width: '90vw', boxShadow: '0 8px 32px #0003', position: 'relative' }} onClick={e => e.stopPropagation()}>
+            <div style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 1.5, color: '#888', marginBottom: 4 }}>
+              Lesson {modal.lessonIdx + 1} — {modal.area}
             </div>
-            <button style={{ position: 'absolute', top: 8, right: 12, fontSize: 18, background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setModal({ open: false, lessonIdx: null, area: null })}>×</button>
+            <h2 style={{ marginTop: 0, fontSize: 22, color: '#222', lineHeight: 1.3 }}>
+              {modal.summary || 'Revision Idea'}
+            </h2>
+            <div style={{ fontSize: 16, color: '#444', lineHeight: 1.7, marginTop: 16 }}>
+              {modal.detail || 'No details available.'}
+            </div>
+            <button style={{ position: 'absolute', top: 12, right: 16, fontSize: 22, background: 'none', border: 'none', cursor: 'pointer', color: '#999' }} onClick={() => setModal({ open: false, lessonIdx: null, area: null, summary: null, detail: null })}>×</button>
           </div>
         </div>
       )}

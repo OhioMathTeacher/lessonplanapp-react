@@ -6,10 +6,6 @@ exports.handler = async (event) => {
   }
 
   try {
-    const keyPresent = !!process.env.ANTHROPIC_API_KEY;
-    const keyPrefix = process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.substring(0, 10) : 'MISSING';
-    console.log('API key present:', keyPresent, 'prefix:', keyPrefix);
-
     const { fileData, mimeType } = JSON.parse(event.body);
 
     const isPdf = mimeType === 'application/pdf';
@@ -30,7 +26,7 @@ exports.handler = async (event) => {
 
     const message = await client.messages.create({
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 1024,
+      max_tokens: 2048,
       messages: [{
         role: 'user',
         content: [
@@ -39,13 +35,25 @@ exports.handler = async (event) => {
             type: 'text',
             text: `You are an instructional coach helping math teachers revise their lesson plans.
 
-Analyze this lesson plan and provide specific, actionable suggestions in three areas.
+Analyze this lesson plan and provide specific, actionable suggestions in three areas. For each area, provide exactly 3 suggestions. Each suggestion needs a short bold summary (one sentence, under 15 words) and a detailed explanation (2-3 sentences with specific tools, strategies, or examples).
 
 Respond with ONLY a JSON object — no markdown, no extra text — in this exact format:
 {
-  "technology": "2-3 specific suggestions for integrating technology tools such as Desmos, GeoGebra, Nearpod, or Pear Deck",
-  "differentiation": "2-3 specific suggestions for meeting diverse learner needs, including both struggling and advanced students",
-  "discourse": "2-3 specific suggestions for increasing mathematical discussion and student talk"
+  "technology": [
+    {"summary": "Short one-sentence summary", "detail": "Detailed 2-3 sentence explanation with specific tools and examples"},
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"},
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"}
+  ],
+  "differentiation": [
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"},
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"},
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"}
+  ],
+  "discourse": [
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"},
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"},
+    {"summary": "Short one-sentence summary", "detail": "Detailed explanation"}
+  ]
 }`,
           },
         ],
