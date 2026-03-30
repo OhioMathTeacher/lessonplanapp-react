@@ -46,11 +46,34 @@ function App() {
     }
   };
 
-  const handleRibbonClick = (idea, area) => {
-    const opening = `I'd like to explore this ${area} idea further:\n\n"${idea.summary}"\n\n${idea.detail}`;
-    const newMessages = [{ role: 'user', content: opening }];
+  const handleRibbonClick = (idea, area, lessonIdx) => {
+    const lessonIdeas = ideas[lessonIdx];
+    let context = '';
+    if (lessonIdeas && typeof lessonIdeas === 'object') {
+      const summaries = ['technology', 'differentiation', 'discourse']
+        .flatMap(k => (lessonIdeas[k] || []).map(i => `- [${k}] ${i.summary}`))
+        .join('\n');
+      context = `\n\nFor reference, here are all the revision ideas generated for this lesson:\n${summaries}`;
+    }
+    const opening = `I'd like to explore this ${area} idea: "${idea.summary}" — ${idea.detail}${context}`;
+    const newMessages = [...chatMessages, { role: 'user', content: opening }];
     setChatMessages(newMessages);
     sendChat(newMessages);
+  };
+
+  const clearChat = () => setChatMessages([]);
+
+  const downloadChat = () => {
+    const text = chatMessages
+      .map(m => `${m.role === 'user' ? 'You' : 'TomGPT'}: ${m.content}`)
+      .join('\n\n');
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tomgpt-chat-${new Date().toISOString().slice(0,10)}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const handleChatSubmit = (e) => {
@@ -202,7 +225,7 @@ function App() {
                         : hasIdeas
                         ? areaIdeas.map((idea, i) => (
                             <button key={i} className="ribbon-btn"
-                              onClick={() => handleRibbonClick(idea, area)}
+                              onClick={() => handleRibbonClick(idea, area, lessonIdx)}
                               style={{
                                 display: 'block', width: '100%', padding: '10px 14px',
                                 border: `2px solid ${ribbonColors[area]}`,
@@ -255,10 +278,21 @@ function App() {
               style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '2px solid #4a7fa5', flexShrink: 0 }}
               onError={e => { e.currentTarget.style.display = 'none'; }}
             />
-            <div>
+            <div style={{ flex: 1 }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: 0.5 }}>TomGPT</div>
               <div style={{ fontSize: 11, color: '#aaa' }}>Teaching Others Matters</div>
-              <div style={{ fontSize: 11, color: '#666', marginTop: 1 }}>Click a ribbon to start</div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              <button onClick={downloadChat} disabled={chatMessages.length === 0} title="Download chat" style={{
+                background: 'none', border: '1px solid #444', borderRadius: 6,
+                color: chatMessages.length === 0 ? '#444' : '#aaa', cursor: chatMessages.length === 0 ? 'default' : 'pointer',
+                fontSize: 11, padding: '3px 7px',
+              }}>⬇ Save</button>
+              <button onClick={clearChat} disabled={chatMessages.length === 0} title="Clear chat" style={{
+                background: 'none', border: '1px solid #444', borderRadius: 6,
+                color: chatMessages.length === 0 ? '#444' : '#e57373', cursor: chatMessages.length === 0 ? 'default' : 'pointer',
+                fontSize: 11, padding: '3px 7px',
+              }}>✕ Clear</button>
             </div>
           </div>
 
@@ -276,7 +310,7 @@ function App() {
                 background: msg.role === 'user' ? '#0f3460' : '#2a2a4a',
                 color: '#eee', borderRadius: msg.role === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                 padding: '10px 14px', fontSize: 13, lineHeight: 1.6,
-                boxShadow: '0 2px 8px #0003',
+                boxShadow: '0 2px 8px #0003', textAlign: 'left',
               }}>
                 {msg.role === 'assistant' && (
                   <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontWeight: 700, letterSpacing: 1 }}>TOMGPT</div>
