@@ -38,8 +38,8 @@ function App() {
     }
   };
 
-  const uploadCardSize = 220;
-  const revisionCardHeight = 520;
+  const uploadCardSize = 180;
+  const revisionCardHeight = 480;
 
   // Choose a background image from images folder
   const backgroundImage = require('./images/strategic-planning-a-group-works-at-a-table.webp');
