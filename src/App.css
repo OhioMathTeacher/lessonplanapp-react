@@ -1,5 +1,13 @@
+
 .App {
   text-align: center;
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.background-mural {
+  /* See inline style in App.js for dynamic background */
 }
 
 .App-logo {
