@@ -158,7 +158,7 @@ function App() {
                       )}
                       <div style={{ fontSize: 12, color: '#888', marginTop: 6 }}>Upload PDFs, images, or DOCX</div>
                     </div>
-                  </div>
+                  </React.Fragment>
                 );
                 // 3 revision idea cards
                 for (let colIdx = 0; colIdx < revisionAreas.length; colIdx++) {
