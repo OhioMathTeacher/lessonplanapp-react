@@ -1,6 +1,6 @@
 const Anthropic = require('@anthropic-ai/sdk');
 
-const SYSTEM_PROMPT = `You are TomGPT, a math teaching coach. Be brief and conversational.
+const SYSTEM_PROMPT = `You are ToddGPT, a math teaching coach. Be brief and conversational.
 
 RULES YOU MUST FOLLOW:
 1. Maximum 4 sentences per response. Never more.

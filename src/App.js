@@ -58,7 +58,7 @@ function App() {
       text: `${idea.summary}\n\n${idea.detail}`,
     });
 
-    // Add a TomGPT greeting to chat (no API call needed)
+    // Add a ToddGPT greeting to chat (no API call needed)
     const greeting = `Hi! I see you're looking at a ${area} idea: "${idea.summary}". What would you like to explore further? You can paste text from the idea drawer below, or just ask me anything.`;
     setChatMessages(prev => [...prev, { role: 'assistant', content: greeting, isGreeting: true }]);
   };
@@ -67,7 +67,7 @@ function App() {
 
   const downloadChat = () => {
     const text = chatMessages
-      .map(m => `${m.role === 'user' ? 'You' : 'TomGPT'}: ${m.content}`)
+      .map(m => `${m.role === 'user' ? 'You' : 'ToddGPT'}: ${m.content}`)
       .join('\n\n');
     const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -264,7 +264,7 @@ function App() {
           </div>
         </div>
 
-        {/* Right: TomGPT chat panel */}
+        {/* Right: ToddGPT chat panel */}
         <div className="chat-panel" style={{
           width: CHAT_WIDTH, minWidth: 280, display: 'flex', flexDirection: 'column',
           background: '#1a1a2e', color: '#eee', height: '100vh',
@@ -276,13 +276,13 @@ function App() {
             background: '#16213e', display: 'flex', alignItems: 'center', gap: 12,
           }}>
             <img
-              src={require('./images/tombot.png')}
+              src={require('./images/toddicon.jpg')}
               alt="TomBot"
               style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '2px solid #4a7fa5', flexShrink: 0 }}
               onError={e => { e.currentTarget.style.display = 'none'; }}
             />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: 0.5 }}>TomGPT</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: 0.5 }}>ToddGPT</div>
               <div style={{ fontSize: 11, color: '#aaa' }}>Teaching Others Matters</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -316,7 +316,7 @@ function App() {
                 boxShadow: '0 2px 8px #0003', textAlign: 'left',
               }}>
                 {msg.role === 'assistant' && (
-                  <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontWeight: 700, letterSpacing: 1 }}>TOMGPT</div>
+                  <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontWeight: 700, letterSpacing: 1 }}>TODDGPT</div>
                 )}
                 {msg.content}
               </div>
