@@ -7,11 +7,37 @@ import React, { useState } from 'react';
 
 const revisionAreas = ["Technology", "Differentiation", "Discourse"];
 
+const fileToBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.onload = () => resolve(reader.result.split(',')[1]);
+  reader.onerror = reject;
+  reader.readAsDataURL(file);
+});
+
 function App() {
   // Track uploaded files for each lesson (array of arrays)
   const [uploadedFiles, setUploadedFiles] = useState([[], [], []]);
   const [uploadStatus, setUploadStatus] = useState(['yellow', 'yellow', 'yellow']); // yellow=ready, green=success, red=fail
   const [modal, setModal] = useState({ open: false, lessonIdx: null, area: null });
+  // null = no file yet, 'loading' = generating, 'error' = failed, object = ideas ready
+  const [ideas, setIdeas] = useState([null, null, null]);
+
+  const generateIdeas = async (lessonIdx, file) => {
+    setIdeas(prev => { const u = [...prev]; u[lessonIdx] = 'loading'; return u; });
+    try {
+      const base64 = await fileToBase64(file);
+      const res = await fetch('/.netlify/functions/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileData: base64, mimeType: file.type || 'application/pdf' }),
+      });
+      if (!res.ok) throw new Error('API error');
+      const data = await res.json();
+      setIdeas(prev => { const u = [...prev]; u[lessonIdx] = data; return u; });
+    } catch {
+      setIdeas(prev => { const u = [...prev]; u[lessonIdx] = 'error'; return u; });
+    }
+  };
 
   // Handle file upload (append files)
   const handleFileChange = (lessonIdx, e) => {
@@ -28,6 +54,7 @@ function App() {
           updated[lessonIdx] = 'green';
           return updated;
         });
+        generateIdeas(lessonIdx, files[0]);
       } catch {
         setUploadStatus(prev => {
           const updated = [...prev];
@@ -161,6 +188,13 @@ function App() {
                 for (let colIdx = 0; colIdx < revisionAreas.length; colIdx++) {
                   const area = revisionAreas[colIdx];
                   const hasFiles = uploadedFiles[lessonIdx].length > 0;
+                  const lessonIdeas = ideas[lessonIdx];
+                  const isLoading = lessonIdeas === 'loading';
+                  const isError = lessonIdeas === 'error';
+                  const ideaText = lessonIdeas && typeof lessonIdeas === 'object'
+                    ? lessonIdeas[area.toLowerCase()] : null;
+                  const hasIdeas = !!ideaText;
+
                   cards.push(
                     <div
                       key={`cell-${lessonIdx}-${colIdx}`}
@@ -173,22 +207,25 @@ function App() {
                         height: cardRowHeight,
                         width: '100%',
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: 15,
-                        color: hasFiles ? '#111' : '#aaa',
+                        flexDirection: 'column',
+                        alignItems: hasIdeas ? 'flex-start' : 'center',
+                        justifyContent: hasIdeas ? 'flex-start' : 'center',
+                        fontSize: hasIdeas ? 13 : 15,
+                        color: hasIdeas ? '#222' : (hasFiles ? '#555' : '#aaa'),
                         fontStyle: hasFiles ? 'normal' : 'italic',
-                        fontWeight: hasFiles ? 500 : 400,
                         opacity: hasFiles ? 0.98 : 0.85,
                         transition: 'color 0.2s, opacity 0.3s',
-                        cursor: hasFiles ? 'pointer' : 'not-allowed',
-                        marginBottom: 0,
+                        cursor: hasIdeas ? 'pointer' : 'default',
+                        padding: hasIdeas ? '12px 16px' : 0,
+                        overflowY: hasIdeas ? 'auto' : 'hidden',
+                        boxSizing: 'border-box',
                       }}
-                      onClick={() => hasFiles && setModal({ open: true, lessonIdx, area })}
+                      onClick={() => hasIdeas && setModal({ open: true, lessonIdx, area })}
                     >
-                      {hasFiles
-                        ? `Click for ideas (${area})`
-                        : 'High-level ideas will appear here. Click for more detail.'}
+                      {isLoading ? '⏳ Generating ideas...' :
+                       isError ? '⚠️ Could not generate ideas. Try uploading again.' :
+                       hasIdeas ? ideaText :
+                       'Upload a lesson plan to get revision ideas.'}
                     </div>
                   );
                 }
@@ -220,10 +257,11 @@ function App() {
           onClick={() => setModal({ open: false, lessonIdx: null, area: null })}
         >
           <div style={{ background: '#fff', borderRadius: 12, padding: 32, minWidth: 320, minHeight: 120, boxShadow: '0 2px 16px #0002', position: 'relative' }} onClick={e => e.stopPropagation()}>
-            <h2 style={{ marginTop: 0 }}>Ideas for Lesson {modal.lessonIdx + 1} ({modal.area})</h2>
-            <div style={{ fontSize: 16, color: '#333' }}>
-              {/* Placeholder idea content */}
-              This is where your revision ideas will appear!
+            <h2 style={{ marginTop: 0 }}>Ideas for Lesson {modal.lessonIdx + 1} — {modal.area}</h2>
+            <div style={{ fontSize: 16, color: '#333', lineHeight: 1.6 }}>
+              {modal.lessonIdx !== null && ideas[modal.lessonIdx] && typeof ideas[modal.lessonIdx] === 'object'
+                ? ideas[modal.lessonIdx][modal.area.toLowerCase()]
+                : 'No ideas available.'}
             </div>
             <button style={{ position: 'absolute', top: 8, right: 12, fontSize: 18, background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => setModal({ open: false, lessonIdx: null, area: null })}>×</button>
           </div>
