@@ -39,7 +39,7 @@ function App() {
   };
 
   const uploadCardSize = 200;
-  const cardRowHeight = 'calc((100vh - 120px) / 3)';
+  const cardRowHeight = 'calc((100vh - 230px) / 3)';
 
   // Choose a background image from images folder
   const backgroundImage = require('./images/strategic-planning-a-group-works-at-a-table.webp');
@@ -67,12 +67,12 @@ function App() {
         {/* Removed the main title as requested */}
         <div style={{ width: '100%', margin: '0 auto' }}>
           {/* 4-column grid: Uploads + 3 revision areas */}
-          <div style={{ display: 'grid', gridTemplateColumns: `auto ${uploadCardSize}px repeat(3, 1fr)`, gap: 16, alignItems: 'start' }}>
+          <div className="lesson-grid" style={{ display: 'grid', gridTemplateColumns: `auto ${uploadCardSize}px repeat(3, 1fr)`, gap: 16, alignItems: 'start' }}>
             {/* Top row: empty cell + column headers */}
-            <div></div>
-            <div></div>
+            <div className="grid-header-cell"></div>
+            <div className="grid-header-cell"></div>
             {revisionAreas.map((area) => (
-              <div key={area + '-header'} style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>{area}</div>
+              <div key={area + '-header'} className="grid-header-cell column-header" style={{ textAlign: 'center', fontWeight: 'bold', fontSize: 18, marginBottom: 8 }}>{area}</div>
             ))}
 
             {/* 3 rows: upload card + 3 revision cards per lesson (flat array) */}
@@ -164,6 +164,8 @@ function App() {
                   cards.push(
                     <div
                       key={`cell-${lessonIdx}-${colIdx}`}
+                      className="revision-card"
+                      data-area={area}
                       style={{
                         background: '#e3eafc',
                         borderRadius: 8,

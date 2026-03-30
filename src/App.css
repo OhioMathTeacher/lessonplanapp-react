@@ -3,7 +3,30 @@
   text-align: center;
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .lesson-grid {
+    grid-template-columns: auto 1fr !important;
+  }
+  .grid-header-cell {
+    display: none;
+  }
+  .revision-card {
+    grid-column: 1 / -1;
+    height: 180px !important;
+    min-height: 180px !important;
+  }
+  .revision-card::before {
+    content: attr(data-area);
+    display: block;
+    font-weight: bold;
+    font-style: normal;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 6px;
+  }
 }
 
 .background-mural {
