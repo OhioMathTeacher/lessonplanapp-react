@@ -238,7 +238,7 @@ function App() {
           </div>
         </div>
 
-        {/* Right: ToddGPT chat panel */}
+        {/* Right: TomGPT chat panel */}
         <div className="chat-panel" style={{
           width: 340, minWidth: 280, display: 'flex', flexDirection: 'column',
           background: '#1a1a2e', color: '#eee', height: '100vh',
@@ -246,14 +246,19 @@ function App() {
         }}>
           {/* Header */}
           <div style={{
-            padding: '16px 20px', borderBottom: '1px solid #333',
-            background: '#16213e',
+            padding: '12px 16px', borderBottom: '1px solid #333',
+            background: '#16213e', display: 'flex', alignItems: 'center', gap: 12,
           }}>
-            <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: 0.5 }}>
-              🤖 ToddGPT
-            </div>
-            <div style={{ fontSize: 12, color: '#aaa', marginTop: 2 }}>
-              Click any ribbon idea to start a conversation
+            <img
+              src={require('./images/tombot.png')}
+              alt="TomBot"
+              style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', border: '2px solid #4a7fa5', flexShrink: 0 }}
+              onError={e => { e.currentTarget.style.display = 'none'; }}
+            />
+            <div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff', letterSpacing: 0.5 }}>TomGPT</div>
+              <div style={{ fontSize: 11, color: '#aaa' }}>Teaching Others Matters</div>
+              <div style={{ fontSize: 11, color: '#666', marginTop: 1 }}>Click a ribbon to start</div>
             </div>
           </div>
 
@@ -261,7 +266,7 @@ function App() {
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {chatMessages.length === 0 && (
               <div style={{ color: '#666', fontStyle: 'italic', fontSize: 13, textAlign: 'center', marginTop: 40, lineHeight: 1.6 }}>
-                No conversation yet.<br />Click a ribbon button on the left to explore an idea with ToddGPT.
+                No conversation yet.<br />Click a ribbon button on the left to explore an idea with TomGPT.
               </div>
             )}
             {chatMessages.map((msg, i) => (
@@ -274,7 +279,7 @@ function App() {
                 boxShadow: '0 2px 8px #0003',
               }}>
                 {msg.role === 'assistant' && (
-                  <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontWeight: 700, letterSpacing: 1 }}>TODDGPT</div>
+                  <div style={{ fontSize: 10, color: '#888', marginBottom: 4, fontWeight: 700, letterSpacing: 1 }}>TOMGPT</div>
                 )}
                 {msg.content}
               </div>
