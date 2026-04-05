@@ -1,5 +1,3 @@
-const Anthropic = require('@anthropic-ai/sdk');
-
 const SYSTEM_PROMPT = `You are ToddGPT, a math teaching coach. Be brief and conversational.
 
 RULES YOU MUST FOLLOW:
@@ -17,19 +15,33 @@ exports.handler = async (event) => {
   try {
     const { messages } = JSON.parse(event.body);
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 300,
-      system: SYSTEM_PROMPT,
-      messages,
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 300,
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          ...messages,
+        ],
+      }),
     });
 
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Groq chat error:', response.status, errText);
+      throw new Error(`Groq API returned ${response.status}`);
+    }
+
+    const data = await response.json();
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ reply: response.content[0].text }),
+      body: JSON.stringify({ reply: data.choices[0].message.content }),
     };
   } catch (error) {
     console.error('chat error:', error);
