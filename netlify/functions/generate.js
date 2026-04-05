@@ -1,5 +1,3 @@
-const Anthropic = require('@anthropic-ai/sdk');
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
@@ -11,29 +9,21 @@ exports.handler = async (event) => {
     const isPdf = mimeType === 'application/pdf';
     const isImage = mimeType.startsWith('image/');
 
-    if (!isPdf && !isImage) {
+    if (isPdf) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Unsupported file type. Please upload a PDF or image.' }),
+        body: JSON.stringify({ error: 'PDFs are not supported. Please upload an image (JPG or PNG) of your lesson plan.' }),
       };
     }
 
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    if (!isImage) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Unsupported file type. Please upload an image.' }),
+      };
+    }
 
-    const fileBlock = isPdf
-      ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: fileData } }
-      : { type: 'image', source: { type: 'base64', media_type: mimeType, data: fileData } };
-
-    const message = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 3000,
-      messages: [{
-        role: 'user',
-        content: [
-          fileBlock,
-          {
-            type: 'text',
-            text: `You are an instructional coach helping math teachers revise their lesson plans.
+    const prompt = `You are an instructional coach helping math teachers revise their lesson plans.
 
 Analyze this lesson plan and provide specific, actionable suggestions in three areas. For each area, provide exactly 3 suggestions. Each suggestion needs a short summary (one sentence, under 15 words) and a rich, detailed explanation (4-6 sentences) that includes: the specific strategy or tool to use, how to implement it step-by-step in this lesson, what the teacher would say or do, and the pedagogical reason it helps students.
 
@@ -54,14 +44,44 @@ Respond with ONLY a JSON object — no markdown, no extra text — in this exact
     {"summary": "Short one-sentence summary", "detail": "Rich explanation"},
     {"summary": "Short one-sentence summary", "detail": "Rich explanation"}
   ]
-}`,
-          },
-        ],
-      }],
+}`;
+
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        max_tokens: 3000,
+        messages: [{
+          role: 'user',
+          content: [
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType};base64,${fileData}`,
+              },
+            },
+            {
+              type: 'text',
+              text: prompt,
+            },
+          ],
+        }],
+      }),
     });
 
-    const raw = message.content[0].text.trim();
-    // Strip markdown code fences if Claude wraps the response
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('Groq API error:', response.status, errText);
+      throw new Error(`Groq API returned ${response.status}`);
+    }
+
+    const data = await response.json();
+    const raw = data.choices[0].message.content.trim();
+    // Strip markdown code fences if the model wraps the response
     const cleaned = raw.replace(/^```json\n?/, '').replace(/^```\n?/, '').replace(/\n?```$/, '');
     const ideas = JSON.parse(cleaned);
 
